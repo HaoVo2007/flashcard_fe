@@ -213,10 +213,21 @@
         // INITIALIZATION
         // ====================================
         $(document).ready(function () {
+            checkAuth();
             setupToastr();
             bindEvents();
             loadTopics();
         });
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // Chưa đăng nhập => chuyển về trang login
+                window.location.href = '/flashcard_fe/auth/login.html';
+                return false;
+            }
+            return true;
+        }
 
         function setupToastr() {
             toastr.options = {

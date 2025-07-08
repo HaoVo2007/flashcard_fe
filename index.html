@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,14 +16,16 @@
     <link rel="stylesheet" href="/flashcard_fe/css/style.css">
 
 </head>
+
 <body class="bg-gray-50">
     <div id="header"></div>
     <!-- Demo Content -->
     <main class="container mx-auto px-4 py-8">
         <div class="text-center">
             <h2 class="text-3xl font-bold text-gray-800 mb-4">Chào mừng đến với VocabMaster</h2>
-            <p class="text-gray-600 mb-8">Học từ vựng một cách thông minh và hiệu quả với hệ thống thẻ ghi nhớ tiên tiến</p>
-            
+            <p class="text-gray-600 mb-8">Học từ vựng một cách thông minh và hiệu quả với hệ thống thẻ ghi nhớ tiên tiến
+            </p>
+
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
@@ -32,7 +35,7 @@
                     <h3 class="text-2xl font-bold text-gray-800">12</h3>
                     <p class="text-gray-600">Chủ đề</p>
                 </div>
-                
+
                 <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
                     <div class="text-green-600 text-3xl mb-2">
                         <i class="fas fa-spell-check"></i>
@@ -40,7 +43,7 @@
                     <h3 class="text-2xl font-bold text-gray-800">248</h3>
                     <p class="text-gray-600">Từ vựng</p>
                 </div>
-                
+
                 <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
                     <div class="text-blue-600 text-3xl mb-2">
                         <i class="fas fa-trophy"></i>
@@ -52,6 +55,20 @@
         </div>
     </main>
     <script src="/flashcard_fe/js/main.js"></script>
-
+    <script>
+        $(document).ready(function () {
+            checkAuth();
+            function checkAuth() {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    // Chưa đăng nhập => chuyển về trang login
+                    window.location.href = '/flashcard_fe/auth/login.html';
+                    return false;
+                }
+                return true;
+            }
+        });
+    </script>
 </body>
+
 </html>

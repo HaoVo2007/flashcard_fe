@@ -163,19 +163,8 @@ $(document).ready(function () {
                     localStorage.setItem('token', data.data.token);
                     localStorage.setItem('refresh_token', data.data.refresh_token);
                     localStorage.setItem('user_info', JSON.stringify(data.data));
-
-                    if (typeof window.AuthManager !== 'undefined') {
-                        window.AuthManager.checkAuthAndUpdateHeader();
-                    }
-
                     setTimeout(function () {
-                        if (data.data.user_type === 'admin') {
-                            window.location.href = '/ecommerce_fe/admin/index.html';
-                        } else if (data.data.user_type === 'user') {
-                            window.location.href = '/ecommerce_fe/index.html';
-                        } else {
-                            toastr.error('User type invalid.');
-                        }
+                        window.location.href = '/flashcard_fe/index.html';
                     }, 1000);
                 } else {
                     toastr.error(data.message || 'Login failed');
