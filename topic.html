@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VocabMaster - Quản lý chủ đề</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/flashcard_fe/css/style.css">
+</head>
+
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div id="header"></div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Search and Filter -->
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="relative flex-1 max-w-md">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm chủ đề..."
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+
+                <div class="flex items-center space-x-5">
+                    <select id="sortBy"
+                        class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="newest">Mới nhất</option>
+                        <option value="oldest">Cũ nhất</option>
+                        <option value="name">Tên A-Z</option>
+                        <option value="name-desc">Tên Z-A</option>
+                    </select>
+                    <div class="flex items-center space-x-5">
+                        <div class="topic-stats rounded-lg px-4 py-2">
+                            <span class="text-sm text-gray-600">Tổng chủ đề: </span>
+                            <span id="topicCount" class="font-semibold text-indigo-600">0</span>
+                        </div>
+                        <button id="addTopicBtn" class="btn-gradient text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-plus mr-2"></i>Thêm chủ đề
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topics Grid -->
+        <div id="topicsContainer" class="topic-grid">
+            <!-- Topics will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-16 hidden">
+            <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Chưa có chủ đề nào</h3>
+            <p class="text-gray-500 mb-6">Bắt đầu bằng cách tạo chủ đề đầu tiên của bạn</p>
+            <button class="btn-gradient text-white px-6 py-3 rounded-lg font-medium">
+                <i class="fas fa-plus mr-2"></i>Tạo chủ đề đầu tiên
+            </button>
+        </div>
+    </main>
+
+    <!-- Add/Edit Topic Modal -->
+    <div id="topicModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 id="modalTitle" class="text-xl font-semibold text-gray-800">Thêm chủ đề mới</h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="topicForm">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tên chủ đề *</label>
+                        <input type="text" id="topicName" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder="Nhập tên chủ đề...">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
+                        <textarea id="topicDescription" rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder="Nhập mô tả cho chủ đề..."></textarea>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Màu sắc</label>
+                        <div class="flex items-center space-x-5">
+                            <input type="color" id="topicColor" value="#667eea" class="color-picker">
+                            <span class="text-sm text-gray-600">Chọn màu đại diện cho chủ đề</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancelBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                            Hủy
+                        </button>
+                        <button type="submit" id="saveBtn"
+                            class="btn-gradient text-white px-6 py-2 rounded-md font-medium">
+                            Lưu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Xác nhận xóa</h3>
+                    <button id="closeDeleteModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa chủ đề "<span id="deleteTopicName"
+                        class="font-semibold"></span>"? Hành động này không thể hoàn tác.</p>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancelDeleteBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                        Hủy
+                    </button>
+                    <button type="button" id="confirmDeleteBtn"
+                        class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-md font-medium">
+                        Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addWordsModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden slide-in">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold">Thêm từ vựng</h3>
+                            <p class="text-indigo-100 mt-1">Chủ đề: <span id="modalTopicName"></span></p>
+                        </div>
+                        <button id="closeModalWords" class="text-white hover:text-gray-200 transition-colors">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Danh sách từ vựng</h4>
+                            <button id="addWordBtn"
+                                class="add-word-btn text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all">
+                                <i class="fas fa-plus mr-2"></i>Thêm thẻ
+                            </button>
+                        </div>
+
+                        <div id="wordsContainer" class="space-y-4">
+                            <!-- Word cards will be added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-between">
+                    <div class="text-sm text-gray-500">
+                        <span id="wordCount">0</span> từ vựng
+                    </div>
+                    <div class="flex space-x-3">
+                        <button id="cancelBtnWords"
+                            class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                            Hủy
+                        </button>
+                        <button id="saveWordsBtn"
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-save mr-2"></i>Lưu tất cả
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/flashcard_fe/js/env.js"></script>
+    <script src="/flashcard_fe/js/main.js"></script>
+
+    <Script>
+        // ====================================
+        // GLOBAL VARIABLES
+        // ====================================
+        let topics = [];
+        let editingTopicId = null;
+        let deleteTopicId = null;
+        let currentTopicId = null;
+        let wordCards = [];
+
+        // ====================================
+        // INITIALIZATION
+        // ====================================
+        $(document).ready(function () {
+            setupToastr();
+            bindEvents();
+            loadTopics();
+        });
+
+        function setupToastr() {
+            toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: false,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                preventDuplicates: false,
+                onclick: null,
+                showDuration: "300",
+                hideDuration: "1000",
+                timeOut: "5000",
+                extendedTimeOut: "1000",
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+            };
+        }
+
+        function bindEvents() {
+            // Modal events
+            $('#addTopicBtn, #emptyState button').click(openAddModal);
+            $('#closeModal, #cancelBtn').click(closeModal);
+            $('#closeDeleteModal, #cancelDeleteBtn').click(closeDeleteModal);
+            $('#closeModalWords, #cancelBtnWords').click(closeAddWordsModal);
+
+            // Form events
+            $('#topicForm').submit(handleTopicSubmit);
+            $('#confirmDeleteBtn').click(handleTopicDelete);
+            $('#saveWordsBtn').click(handleWordsSave);
+            $('#addWordBtn').click(addWordCard);
+
+            // Search and filter
+            $('#searchInput').on('input', filterTopics);
+            $('#sortBy').change(sortTopics);
+
+            // Modal close events
+            $(document).on('click', '.modal', function (e) {
+                if (e.target === this) {
+                    closeModal();
+                    closeDeleteModal();
+                    closeAddWordsModal();
+                }
+            });
+
+            // ESC key to close modals
+            $(document).on('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    if ($('#topicModal').is(':visible')) closeModal();
+                    if ($('#deleteModal').is(':visible')) closeDeleteModal();
+                    if ($('#addWordsModal').is(':visible')) closeAddWordsModal();
+                }
+            });
+        }
+
+        // ====================================
+        // AUTHENTICATION & UTILITY
+        // ====================================
+        function getAuthToken() {
+            return localStorage.getItem('token') || '';
+        }
+
+        function getApiHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getAuthToken()
+            };
+        }
+
+        function handleAuthError() {
+            toastr.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            // window.location.href = '/login';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // ====================================
+        // TOPIC MANAGEMENT - API CALLS
+        // ====================================
+
+        // Load all topics from API
+        function loadTopics() {
+            $.ajax({
+                url: `${ENV.API_BASE_URL}/api/v1/topic/user`,
+                method: 'GET',
+                headers: getApiHeaders(),
+                success: function (response) {
+                    topics = response.data || [];
+                    renderTopics();
+                    updateTopicCount();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading topics:', error);
+                    if (xhr.status === 401) {
+                        handleAuthError();
+                    } else {
+                        toastr.error('Không thể tải danh sách chủ đề');
+                    }
+                    topics = [];
+                    renderTopics();
+                }
+            });
+        }
+
+        // Create new topic
+        function createTopic(topicData) {
+            return $.ajax({
+                url: `${ENV.API_BASE_URL}/api/v1/topic`,
+                method: 'POST',
+                headers: getApiHeaders(),
+                data: JSON.stringify(topicData),
+                success: function (response) {
+                    toastr.success('Tạo chủ đề thành công');
+                    closeModal();
+                    loadTopics();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error creating topic:', error);
+                    if (xhr.status === 401) {
+                        handleAuthError();
+                    } else {
+                        const errorMessage = xhr.responseJSON?.message || 'Có lỗi xảy ra khi tạo chủ đề';
+                        toastr.error(errorMessage);
+                    }
+                }
+            });
+        }
+
+        // Update existing topic
+        function updateTopic(topicId, topicData) {
+            return $.ajax({
+                url: `${ENV.API_BASE_URL}/api/v1/topic/${topicId}`,
+                method: 'PUT',
+                headers: getApiHeaders(),
+                data: JSON.stringify(topicData),
+                success: function (response) {
+                    toastr.success('Cập nhật chủ đề thành công');
+                    closeModal();
+                    loadTopics();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating topic:', error);
+                    if (xhr.status === 401) {
+                        handleAuthError();
+                    } else {
+                        const errorMessage = xhr.responseJSON?.message || 'Có lỗi xảy ra khi cập nhật chủ đề';
+                        toastr.error(errorMessage);
+                    }
+                }
+            });
+        }
+
+        // Delete topic
+        function deleteTopic(topicId) {
+            return $.ajax({
+                url: `${ENV.API_BASE_URL}/api/v1/topic/${topicId}`,
+                method: 'DELETE',
+                headers: getApiHeaders(),
+                success: function (response) {
+                    toastr.success('Xóa chủ đề thành công');
+                    closeDeleteModal();
+                    loadTopics();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error deleting topic:', error);
+                    if (xhr.status === 401) {
+                        handleAuthError();
+                    } else {
+                        const errorMessage = xhr.responseJSON?.message || 'Có lỗi xảy ra khi xóa chủ đề';
+                        toastr.error(errorMessage);
+                    }
+                }
+            });
+        }
+
+        // ====================================
+        // WORD MANAGEMENT - API CALLS
+        // ====================================
+
+        // Create single word
+        function createWord(wordData) {
+            return $.ajax({
+                url: `${ENV.API_BASE_URL}/api/v1/word`,
+                method: 'POST',
+                headers: getApiHeaders(),
+                data: JSON.stringify(wordData),
+                timeout: 10000 // 10 second timeout
+            });
+        }
+
+        // Create multiple words
+        function createMultipleWords(wordsArray) {
+            const saveBtn = $('#saveWordsBtn');
+            const originalText = saveBtn.html();
+
+            // Show loading state
+            saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang lưu...');
+
+            let successCount = 0;
+            let errorCount = 0;
+            const totalWords = wordsArray.length;
+
+            const savePromises = wordsArray.map((word, index) => {
+                const wordData = {
+                    topic_id: currentTopicId,
+                    word: word.word,
+                    definition: word.definition,
+                    example: word.example,
+                    word_type: word.wordType
+                };
+
+                return createWord(wordData)
+                    .done(function (response) {
+                        successCount++;
+                        console.log(`Word ${index + 1} saved successfully`);
+                    })
+                    .fail(function (xhr, status, error) {
+                        errorCount++;
+                        console.error(`Error saving word ${index + 1}:`, error);
+                    });
+            });
+
+            // Wait for all promises to complete
+            $.when.apply($, savePromises).always(function () {
+                // Reset button state
+                saveBtn.prop('disabled', false).html(originalText);
+
+                // Show results
+                if (errorCount === 0) {
+                    toastr.success(`Đã lưu thành công ${successCount} từ vựng!`);
+                    closeAddWordsModal();
+                    updateTopicWordCount(currentTopicId, successCount);
+                } else if (successCount > 0) {
+                    toastr.warning(`Đã lưu ${successCount}/${totalWords} từ vựng. ${errorCount} từ vựng bị lỗi.`);
+                } else {
+                    toastr.error('Có lỗi xảy ra khi lưu từ vựng. Vui lòng thử lại.');
+                }
+            });
+        }
+
+        // ====================================
+        // TOPIC MANAGEMENT - UI FUNCTIONS
+        // ====================================
+        function renderTopics() {
+            const container = $('#topicsContainer');
+            const emptyState = $('#emptyState');
+
+            if (topics.length === 0) {
+                container.hide();
+                emptyState.show();
+                return;
+            }
+
+            container.show();
+            emptyState.hide();
+
+            const topicsHtml = topics.map(topic => `
+        <div class="topic-card bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300" 
+             style="--topic-color: ${topic.color}">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-4 h-4 rounded-full" style="background-color: ${topic.color}"></div>
+                    <h3 class="text-lg font-semibold text-gray-800">${topic.name}</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="edit-btn text-gray-500 hover:text-indigo-600 transition-colors" 
+                            data-id="${topic.id}" title="Chỉnh sửa">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete-btn text-gray-500 hover:text-red-600 transition-colors" 
+                            data-id="${topic.id}" data-name="${topic.name}" title="Xóa">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <p class="text-gray-600 mb-4 line-clamp-2">${topic.description || 'Chưa có mô tả'}</p>
+            
+            <div class="flex items-center justify-between text-sm text-gray-500">
+                <span>
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    ${formatDate(topic.createdAt)}
+                </span>
+                <span>
+                    <i class="fas fa-cards-blank mr-1"></i>
+                    ${topic.wordCount || 0} từ vựng
+                </span>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <button class="add-words-btn w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-4 rounded-md font-medium hover:from-green-600 hover:to-green-700 transition-all duration-300 mb-2"
+                        data-id="${topic.id}" data-name="${topic.name}">
+                    <i class="fas fa-plus mr-2"></i>
+                    Thêm từ vựng
+                </button>
+                <button class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2 px-4 rounded-md font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-300">
+                    <a href="study.html?topic=${topic.id}">
+                        <i class="fas fa-play mr-2"></i>
+                        Học ngay
+                    </a>
+                </button>
+            </div>
+        </div>
+    `).join('');
+
+            container.html(topicsHtml);
+            bindTopicEvents();
+        }
+
+        function bindTopicEvents() {
+            $('.add-words-btn').off('click').on('click', function () {
+                const topicId = $(this).data('id');
+                const topicName = $(this).data('name');
+                openAddWordsModal(topicId, topicName);
+            });
+
+            $('.edit-btn').off('click').on('click', function () {
+                const topicId = $(this).data('id');
+                openEditModal(topicId);
+            });
+
+            $('.delete-btn').off('click').on('click', function () {
+                const topicId = $(this).data('id');
+                const topicName = $(this).data('name');
+                openDeleteModal(topicId, topicName);
+            });
+        }
+
+        function updateTopicCount() {
+            $('#topicCount').text(topics.length);
+        }
+
+        function updateTopicWordCount(topicId, addedCount) {
+            const topic = topics.find(t => t.id === topicId);
+            if (topic) {
+                topic.wordCount = (topic.wordCount || 0) + addedCount;
+                renderTopics();
+            }
+        }
+
+        function filterTopics() {
+            const searchTerm = $('#searchInput').val().toLowerCase();
+            const filteredTopics = topics.filter(topic =>
+                topic.name.toLowerCase().includes(searchTerm) ||
+                (topic.description && topic.description.toLowerCase().includes(searchTerm))
+            );
+
+            const originalTopics = topics;
+            topics = filteredTopics;
+            renderTopics();
+            topics = originalTopics;
+        }
+
+        function sortTopics() {
+            const sortBy = $('#sortBy').val();
+
+            switch (sortBy) {
+                case 'newest':
+                    topics.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+                case 'oldest':
+                    topics.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                case 'name':
+                    topics.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'name-desc':
+                    topics.sort((a, b) => b.name.localeCompare(a.name));
+                    break;
+            }
+
+            renderTopics();
+        }
+
+        // ====================================
+        // MODAL MANAGEMENT - TOPICS
+        // ====================================
+        function openAddModal() {
+            editingTopicId = null;
+            $('#modalTitle').text('Thêm chủ đề mới');
+            $('#topicName').val('');
+            $('#topicDescription').val('');
+            $('#topicColor').val('#667eea');
+            $('#topicModal').removeClass('hidden');
+            $('#topicName').focus();
+        }
+
+        function openEditModal(topicId) {
+            const topic = topics.find(t => t.id === topicId);
+            if (!topic) return;
+
+            editingTopicId = topicId;
+            $('#modalTitle').text('Chỉnh sửa chủ đề');
+            $('#topicName').val(topic.name);
+            $('#topicDescription').val(topic.description || '');
+            $('#topicColor').val(topic.color);
+            $('#topicModal').removeClass('hidden');
+            $('#topicName').focus();
+        }
+
+        function closeModal() {
+            $('#topicModal').addClass('hidden');
+            editingTopicId = null;
+        }
+
+        function openDeleteModal(topicId, topicName) {
+            deleteTopicId = topicId;
+            $('#deleteTopicName').text(topicName);
+            $('#deleteModal').removeClass('hidden');
+        }
+
+        function closeDeleteModal() {
+            $('#deleteModal').addClass('hidden');
+            deleteTopicId = null;
+        }
+
+        // ====================================
+        // MODAL MANAGEMENT - WORDS
+        // ====================================
+        function openAddWordsModal(topicId, topicName) {
+            currentTopicId = topicId;
+            $('#modalTopicName').text(topicName);
+            $('#addWordsModal').removeClass('hidden');
+
+            // Reset modal content
+            wordCards = [];
+            $('#wordsContainer').empty();
+            updateWordCount();
+
+            // Add first word card
+            addWordCard();
+
+            // Focus on first input
+            setTimeout(() => {
+                $('#wordsContainer .word-input:first').focus();
+            }, 100);
+        }
+
+        function closeAddWordsModal() {
+            $('#addWordsModal').addClass('hidden');
+            currentTopicId = null;
+            wordCards = [];
+        }
+
+        function addWordCard() {
+            const cardId = Date.now() + Math.random();
+            const cardNumber = wordCards.length + 1;
+
+            const cardHtml = `
+                <div class="word-card bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-indigo-300 transition-all" data-card-id="${cardId}">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                                <span class="text-indigo-600 font-semibold text-sm">${cardNumber}</span>
+                            </div>
+                            <h5 class="font-medium text-gray-900">Thẻ từ vựng</h5>
+                        </div>
+                        <button class="remove-word-btn text-gray-400 hover:text-red-500 transition-colors" data-card-id="${cardId}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Từ vựng <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" class="word-input w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                                placeholder="Nhập từ vựng..." name="word" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Định nghĩa <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" class="word-input w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                                placeholder="Nhập định nghĩa..." name="definition" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ví dụ</label>
+                            <input type="text" class="word-input w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                                placeholder="Nhập ví dụ..." name="example">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Loại từ</label>
+                            <select class="word-input w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" name="wordType">
+                                <option value="">Chọn loại từ</option>
+                                <option value="noun">Danh từ</option>
+                                <option value="verb">Động từ</option>
+                                <option value="adjective">Tính từ</option>
+                                <option value="adverb">Trạng từ</option>
+                                <option value="other">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('#wordsContainer').append(cardHtml);
+            wordCards.push(cardId);
+            updateWordCount();
+
+            // Bind remove event
+            $(`.remove-word-btn[data-card-id="${cardId}"]`).off('click').on('click', function () {
+                removeWordCard(cardId);
+            });
+
+            // Auto-focus on the new word input
+            setTimeout(() => {
+                $(`.word-card[data-card-id="${cardId}"] input[name="word"]`).focus();
+            }, 100);
+        }
+
+        function removeWordCard(cardId) {
+            if (wordCards.length <= 1) {
+                toastr.warning('Phải có ít nhất 1 thẻ từ vựng');
+                return;
+            }
+
+            $(`.word-card[data-card-id="${cardId}"]`).remove();
+            wordCards = wordCards.filter(id => id !== cardId);
+            updateWordCount();
+            updateCardNumbers();
+        }
+
+        function updateWordCount() {
+            $('#wordCount').text(wordCards.length);
+        }
+
+        function updateCardNumbers() {
+            $('.word-card').each(function (index) {
+                $(this).find('.w-8.h-8 span').text(index + 1);
+            });
+        }
+
+        function validateWords() {
+            let isValid = true;
+            const words = [];
+
+            $('.word-card').each(function () {
+                const card = $(this);
+                const word = card.find('input[name="word"]').val().trim();
+                const definition = card.find('input[name="definition"]').val().trim();
+                const example = card.find('input[name="example"]').val().trim();
+                const wordType = card.find('select[name="wordType"]').val();
+
+                // Reset previous error states
+                card.find('.word-input').removeClass('border-red-500');
+
+                if (!word) {
+                    card.find('input[name="word"]').addClass('border-red-500');
+                    isValid = false;
+                }
+
+                if (!definition) {
+                    card.find('input[name="definition"]').addClass('border-red-500');
+                    isValid = false;
+                }
+
+                if (word && definition) {
+                    words.push({
+                        word: word,
+                        definition: definition,
+                        example: example,
+                        wordType: wordType
+                    });
+                }
+            });
+
+            if (!isValid) {
+                toastr.error('Vui lòng điền đầy đủ thông tin bắt buộc (từ vựng và định nghĩa)');
+                return null;
+            }
+
+            return words;
+        }
+
+        // ====================================
+        // EVENT HANDLERS
+        // ====================================
+        function handleTopicSubmit(e) {
+            e.preventDefault();
+
+            const formData = {
+                name: $('#topicName').val().trim(),
+                description: $('#topicDescription').val().trim(),
+                color: $('#topicColor').val()
+            };
+
+            if (!formData.name) {
+                toastr.error('Vui lòng nhập tên chủ đề');
+                $('#topicName').focus();
+                return;
+            }
+
+            if (editingTopicId) {
+                updateTopic(editingTopicId, formData);
+            } else {
+                createTopic(formData);
+            }
+        }
+
+        function handleTopicDelete() {
+            if (!deleteTopicId) return;
+            deleteTopic(deleteTopicId);
+        }
+
+        function handleWordsSave() {
+            const words = validateWords();
+            if (!words || words.length === 0) return;
+
+            createMultipleWords(words);
+        }
+    </Script>
+</body>
+
+</html>

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học từ vựng tiếng Anh</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/flashcard_fe/css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div id="header"></div>
+    <!-- Mode Selection -->
+    <div class="max-w-6xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <button class="mode-btn bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors" data-mode="flashcard">
+                📇 Thẻ ghi nhớ
+            </button>
+            <button class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border" data-mode="choose-meaning">
+                🎯 Chọn nghĩa đúng
+            </button>
+            <button class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border" data-mode="choose-word">
+                🔤 Chọn từ đúng
+            </button>
+            <button class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border" data-mode="test">
+                ✍️ Kiểm tra
+            </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="bg-white rounded-lg p-4 mb-6 shadow-sm">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium text-gray-600">Tiến độ học tập</span>
+                <span class="text-sm font-medium text-gray-600"><span id="current-progress">1</span> / <span id="total-words">6</span></span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 16.67%"></div>
+            </div>
+        </div>
+
+        <!-- Learning Content -->
+        <div class="bg-white rounded-lg shadow-sm">
+            <!-- Flashcard Mode -->
+            <div id="flashcard-mode" class="p-8 text-center">
+                <div class="flashcard relative mx-auto max-w-md h-64 cursor-pointer mb-6">
+                    <div class="flashcard-front absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <div>
+                            <div class="text-3xl font-bold mb-2" id="flashcard-word">Play</div>
+                            <div class="text-sm opacity-80" id="flashcard-type">verb</div>
+                        </div>
+                    </div>
+                    <div class="flashcard-back absolute inset-0 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <div>
+                            <div class="text-3xl font-bold mb-2" id="flashcard-definition">Chơi</div>
+                            <div class="text-sm opacity-80">Nghĩa tiếng Việt</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-gray-600 mb-6">
+                    <p>Click vào thẻ để xem nghĩa tiếng Việt</p>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button id="prev-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                        ← Trước
+                    </button>
+                    <button id="next-btn" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        Tiếp theo →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Choose Meaning Mode -->
+            <div id="choose-meaning-mode" class="p-8 text-center hidden">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Chọn nghĩa đúng</h2>
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-6 mb-6">
+                        <div class="text-3xl font-bold mb-2" id="quiz-word">Play</div>
+                        <div class="text-sm opacity-80" id="quiz-type">verb</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <button class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors" data-answer="0">
+                        Đáp án 1
+                    </button>
+                    <button class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors" data-answer="1">
+                        Đáp án 2
+                    </button>
+                    <button class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors" data-answer="2">
+                        Đáp án 3
+                    </button>
+                    <button class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors" data-answer="3">
+                        Đáp án 4
+                    </button>
+                </div>
+                <div id="quiz-result" class="hidden mb-4">
+                    <div class="text-lg font-medium mb-2"></div>
+                    <button id="next-quiz-btn" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        Câu tiếp theo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Choose Word Mode -->
+            <div id="choose-word-mode" class="p-8 text-center hidden">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Chọn từ đúng</h2>
+                    <div class="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg p-6 mb-6">
+                        <div class="text-3xl font-bold mb-2" id="word-quiz-definition">Chơi</div>
+                        <div class="text-sm opacity-80">Nghĩa tiếng Việt</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <button class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors" data-answer="0">
+                        Đáp án 1
+                    </button>
+                    <button class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors" data-answer="1">
+                        Đáp án 2
+                    </button>
+                    <button class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors" data-answer="2">
+                        Đáp án 3
+                    </button>
+                    <button class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors" data-answer="3">
+                        Đáp án 4
+                    </button>
+                </div>
+                <div id="word-quiz-result" class="hidden mb-4">
+                    <div class="text-lg font-medium mb-2"></div>
+                    <button id="next-word-quiz-btn" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        Câu tiếp theo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Test Mode -->
+            <div id="test-mode" class="p-8 text-center hidden">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Kiểm tra</h2>
+                    <div class="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg p-6 mb-6">
+                        <div class="text-lg mb-2">Điền vào chỗ trống:</div>
+                        <div class="text-2xl font-bold mb-2" id="test-definition">Chơi</div>
+                        <div class="text-sm opacity-80">Nghĩa tiếng Việt</div>
+                    </div>
+                </div>
+                <div class="max-w-md mx-auto mb-6">
+                    <input type="text" id="test-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg text-center" placeholder="Nhập từ tiếng Anh...">
+                </div>
+                <div class="mb-6">
+                    <button id="check-answer-btn" class="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium">
+                        Kiểm tra
+                    </button>
+                </div>
+                <div id="test-result" class="hidden">
+                    <div class="text-lg font-medium mb-4"></div>
+                    <button id="next-test-btn" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        Câu tiếp theo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Congratulations Modal -->
+    <div id="congratulations-modal" class="congratulations-modal fixed inset-0 z-50 flex items-center justify-center hidden">
+        <!-- Fireworks -->
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+        
+        <!-- Confetti -->
+        <div class="confetti" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="confetti" style="left: 20%; animation-delay: 0.5s;"></div>
+        <div class="confetti" style="left: 30%; animation-delay: 1s;"></div>
+        <div class="confetti" style="left: 40%; animation-delay: 1.5s;"></div>
+        <div class="confetti" style="left: 50%; animation-delay: 2s;"></div>
+        <div class="confetti" style="left: 60%; animation-delay: 2.5s;"></div>
+        <div class="confetti" style="left: 70%; animation-delay: 3s;"></div>
+        <div class="confetti" style="left: 80%; animation-delay: 3.5s;"></div>
+        <div class="confetti" style="left: 90%; animation-delay: 4s;"></div>
+        
+        <!-- Stars -->
+        <div class="star" style="top: 20%; left: 25%; animation-delay: 0.5s;">⭐</div>
+        <div class="star" style="top: 30%; right: 25%; animation-delay: 1s;">✨</div>
+        <div class="star" style="bottom: 30%; left: 20%; animation-delay: 1.5s;">🌟</div>
+        <div class="star" style="top: 40%; right: 40%; animation-delay: 2s;">⭐</div>
+        <div class="star" style="bottom: 40%; right: 20%; animation-delay: 2.5s;">✨</div>
+        
+        <!-- Modal Content -->
+        <div class="congratulations-content bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+            <div class="text-6xl mb-4">🎉</div>
+            <h2 class="celebration-text text-3xl font-bold mb-4">Chúc mừng bạn!</h2>
+            <p class="text-gray-600 mb-6">Bạn đã hoàn thành tất cả từ vựng trong chủ đề này! Thật tuyệt vời! 🎊</p>
+            
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-4 mb-6">
+                <div class="text-2xl font-bold mb-2">📚 Thành tích của bạn</div>
+                <div class="text-lg">✅ Đã học: <span id="completed-words">6</span> từ vựng</div>
+                <div class="text-lg">🎯 Hoàn thành: 100%</div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button id="restart-btn" class="flex-1 bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors font-medium">
+                    🔄 Học lại
+                </button>
+                <button id="close-congratulations" class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors font-medium">
+                    🏠 Trang chủ
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="/flashcard_fe/js/env.js"></script>
+    <script src="/flashcard_fe/js/main.js"></script>
+    <script>
+
+        let currentMode = 'flashcard';
+        let currentIndex = 0;
+        let words;
+        let isFlipped = false;
+        let correctAnswer = 0;
+        let answered = false;
+        const topic_id = getQueryId();
+        // Initialize app
+        $(document).ready(function() {
+            loadWordQuizData();
+            setupEventListeners();
+        });
+
+        function getQueryId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('topic');
+        }
+
+        function getAuthToken() {
+            return localStorage.getItem('token') || '';
+        }
+
+        function getApiHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getAuthToken()
+            };
+        }
+
+        function loadWordQuizData() {
+            $.ajax({
+                url: `${ENV.API_BASE_URL}/api/v1/word/topic/${topic_id}`,
+                method: 'GET',
+                headers: getApiHeaders(),
+                success: function (response) {
+                    words = response.data || [];
+                    updateProgress();
+                    showMode(currentMode);
+                    loadFlashcard();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading topics:', error);
+                    if (xhr.status === 401) {
+                        handleAuthError();
+                    } else {
+                        toastr.error('Không thể tải danh sách từ vụng của chủ đề này');
+                    }
+                    words = [];
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            // Mode switching
+            $('.mode-btn').click(function() {
+                const mode = $(this).data('mode');
+                switchMode(mode);
+            });
+
+            // Flashcard events
+            $('.flashcard').click(function() {
+                flipCard();
+            });
+
+            $('#prev-btn').click(function() {
+                previousWord();
+            });
+
+            $('#next-btn').click(function() {
+                nextWord();
+            });
+
+            // Quiz events
+            $('#choose-meaning-mode .option-btn').click(function() {
+                if (!answered) {
+                    checkMeaningAnswer($(this));
+                }
+            });
+
+            $('#choose-word-mode .option-btn').click(function() {
+                if (!answered) {
+                    checkWordAnswer($(this));
+                }
+            });
+
+            $('#next-quiz-btn').click(function() {
+                nextQuiz();
+            });
+
+            $('#next-word-quiz-btn').click(function() {
+                nextWordQuiz();
+            });
+
+            // Test events
+            $('#check-answer-btn').click(function() {
+                checkTestAnswer();
+            });
+
+            $('#test-input').keypress(function(e) {
+                if (e.which === 13) {
+                    checkTestAnswer();
+                }
+            });
+
+            $('#next-test-btn').click(function() {
+                nextTest();
+            });
+            
+            // Congratulations modal events
+            $('#close-congratulations, #restart-btn').click(function() {
+                closeCongratulations();
+            });
+            
+            $('#restart-btn').click(function() {
+                restartLearning();
+            });
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            currentIndex = 0;
+            answered = false;
+            
+            // Update button styles
+            $('.mode-btn').removeClass('bg-blue-500 text-white').addClass('bg-white text-gray-700 border');
+            $(`.mode-btn[data-mode="${mode}"]`).removeClass('bg-white text-gray-700 border').addClass('bg-blue-500 text-white');
+            
+            showMode(mode);
+            updateProgress();
+        }
+
+        function showMode(mode) {
+            // Hide all modes
+            $('#flashcard-mode, #choose-meaning-mode, #choose-word-mode, #test-mode').addClass('hidden');
+            
+            // Show selected mode
+            switch(mode) {
+                case 'flashcard':
+                    $('#flashcard-mode').removeClass('hidden');
+                    loadFlashcard();
+                    break;
+                case 'choose-meaning':
+                    $('#choose-meaning-mode').removeClass('hidden');
+                    loadMeaningQuiz();
+                    break;
+                case 'choose-word':
+                    $('#choose-word-mode').removeClass('hidden');
+                    loadWordQuiz();
+                    break;
+                case 'test':
+                    $('#test-mode').removeClass('hidden');
+                    loadTest();
+                    break;
+            }
+        }
+
+        function updateProgress() {
+            console.log(words)
+            const progress = ((currentIndex + 1) / words.length) * 100;
+            $('#progress-bar').css('width', progress + '%');
+            $('#current-progress').text(currentIndex + 1);
+            $('#total-words').text(words.length);
+        }
+
+        // Flashcard functions
+        function loadFlashcard() {
+            const word = words[currentIndex];
+            $('#flashcard-word').text(word.word);
+            $('#flashcard-type').text(word.word_type);
+            $('#flashcard-definition').text(word.definition);
+            
+            // Reset flip state
+            $('.flashcard').removeClass('flipped');
+            isFlipped = false;
+        }
+
+        function flipCard() {
+            $('.flashcard').toggleClass('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        function previousWord() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadFlashcard();
+                updateProgress();
+            }
+        }
+
+        function nextWord() {
+            if (currentIndex < words.length - 1) {
+                currentIndex++;
+                loadFlashcard();
+                updateProgress();
+            } else {
+                // Completed all words in flashcard mode
+                showCongratulations();
+            }
+        }
+
+        // Quiz functions
+        function loadMeaningQuiz() {
+            const word = words[currentIndex];
+            $('#quiz-word').text(word.word);
+            $('#quiz-type').text(word.word_type);
+            
+            // Generate options
+            const options = generateMeaningOptions(word);
+            const buttons = $('#choose-meaning-mode .option-btn');
+            
+            buttons.each(function(index) {
+                $(this).text(options[index]);
+                $(this).removeClass('correct incorrect');
+            });
+            
+            $('#quiz-result').addClass('hidden');
+            answered = false;
+        }
+
+        function generateMeaningOptions(correctWord) {
+            const options = [correctWord.definition];
+            const otherWords = words.filter(w => w.word !== correctWord.word);
+            
+            // Add 3 random wrong answers
+            while (options.length < 4) {
+                const randomWord = otherWords[Math.floor(Math.random() * otherWords.length)];
+                if (!options.includes(randomWord.definition)) {
+                    options.push(randomWord.definition);
+                }
+            }
+            
+            // Shuffle options
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            
+            // Store correct answer index
+            correctAnswer = options.indexOf(correctWord.definition);
+            
+            return options;
+        }
+
+        function checkMeaningAnswer(button) {
+            const selectedAnswer = parseInt(button.data('answer'));
+            answered = true;
+            
+            if (selectedAnswer === correctAnswer) {
+                button.addClass('correct');
+                $('#quiz-result div').text('Chính xác! 🎉').addClass('text-green-600');
+            } else {
+                button.addClass('incorrect');
+                $(`#choose-meaning-mode .option-btn[data-answer="${correctAnswer}"]`).addClass('correct');
+                $('#quiz-result div').text('Sai rồi! 😞').addClass('text-red-600');
+            }
+            
+            $('#quiz-result').removeClass('hidden');
+        }
+
+        function nextQuiz() {
+            if (currentIndex < words.length - 1) {
+                currentIndex++;
+                loadMeaningQuiz();
+                updateProgress();
+            } else {
+                // Completed all words in meaning quiz mode
+                showCongratulations();
+            }
+        }
+
+        // Word quiz functions
+        function loadWordQuiz() {
+            const word = words[currentIndex];
+            $('#word-quiz-definition').text(word.definition);
+            
+            // Generate options
+            const options = generateWordOptions(word);
+            const buttons = $('#choose-word-mode .option-btn');
+            
+            buttons.each(function(index) {
+                $(this).text(options[index]);
+                $(this).removeClass('correct incorrect');
+            });
+            
+            $('#word-quiz-result').addClass('hidden');
+            answered = false;
+        }
+
+        function generateWordOptions(correctWord) {
+            const options = [correctWord.word];
+            const otherWords = words.filter(w => w.word !== correctWord.word);
+            
+            // Add 3 random wrong answers
+            while (options.length < 4) {
+                const randomWord = otherWords[Math.floor(Math.random() * otherWords.length)];
+                if (!options.includes(randomWord.word)) {
+                    options.push(randomWord.word);
+                }
+            }
+            
+            // Shuffle options
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            
+            // Store correct answer index
+            correctAnswer = options.indexOf(correctWord.word);
+            
+            return options;
+        }
+
+        function checkWordAnswer(button) {
+            const selectedAnswer = parseInt(button.data('answer'));
+            answered = true;
+            
+            if (selectedAnswer === correctAnswer) {
+                button.addClass('correct');
+                $('#word-quiz-result div').text('Chính xác! 🎉').addClass('text-green-600');
+            } else {
+                button.addClass('incorrect');
+                $(`#choose-word-mode .option-btn[data-answer="${correctAnswer}"]`).addClass('correct');
+                $('#word-quiz-result div').text('Sai rồi! 😞').addClass('text-red-600');
+            }
+            
+            $('#word-quiz-result').removeClass('hidden');
+        }
+
+        function nextWordQuiz() {
+            if (currentIndex < words.length - 1) {
+                currentIndex++;
+                loadWordQuiz();
+                updateProgress();
+            } else {
+                // Completed all words in word quiz mode
+                showCongratulations();
+            }
+        }
+
+        // Test functions
+        function loadTest() {
+            const word = words[currentIndex];
+            $('#test-definition').text(word.definition);
+            $('#test-input').val('');
+            $('#test-result').addClass('hidden');
+            answered = false;
+        }
+
+        function checkTestAnswer() {
+            if (answered) return;
+            
+            const userAnswer = $('#test-input').val().trim().toLowerCase();
+            const correctWord = words[currentIndex].word.toLowerCase();
+            
+            answered = true;
+            
+            if (userAnswer === correctWord) {
+                $('#test-result div').text('Chính xác! 🎉').removeClass('text-red-600').addClass('text-green-600');
+            } else {
+                $('#test-result div').text(`Sai rồi! Đáp án đúng là: ${words[currentIndex].word}`).removeClass('text-green-600').addClass('text-red-600');
+            }
+            
+            $('#test-result').removeClass('hidden');
+        }
+
+        function nextTest() {
+            if (currentIndex < words.length - 1) {
+                currentIndex++;
+                loadTest();
+                updateProgress();
+            } else {
+                // Completed all words in test mode
+                showCongratulations();
+            }
+        }
+        
+        // Congratulations functions
+        function showCongratulations() {
+            $('#completed-words').text(words.length);
+            $('#congratulations-modal').removeClass('hidden');
+            
+            // Play celebration sound effect (if needed)
+            // new Audio('celebration.mp3').play();
+        }
+        
+        function closeCongratulations() {
+            $('#congratulations-modal').addClass('hidden');
+        }
+        
+        function restartLearning() {
+            currentIndex = 0;
+            answered = false;
+            isFlipped = false;
+            updateProgress();
+            showMode(currentMode);
+            closeCongratulations();
+        }
+    </script>
+</body>
+</html>

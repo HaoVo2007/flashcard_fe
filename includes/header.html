@@ -1,0 +1,92 @@
+<!-- Header -->
+<header class="gradient-bg shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3">
+        <div class="flex items-center justify-between">
+            <!-- Logo và Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <div class="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center animate-float">
+                        <i class="fas fa-brain text-2xl text-purple-600"></i>
+                    </div>
+                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full notification-dot"></div>
+                </div>
+                <div class="text-white">
+                    <h1 class="text-2xl font-bold">VocabMaster</h1>
+                    <p class="text-sm text-purple-200 hidden sm:block">Học từ vựng thông minh</p>
+                </div>
+            </div>
+
+            <!-- Navigation Desktop -->
+            <nav class="hidden lg:flex items-center space-x-8">
+                <a href="#"
+                    class="nav-link text-white hover:text-purple-200 transition-colors duration-200 flex items-center space-x-2">
+                    <i class="fas fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+                <a href="/flashcard_fe/topic.html"
+                    class="nav-link text-white hover:text-purple-200 transition-colors duration-200 flex items-center space-x-2">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Chủ đề</span>
+                </a>
+                <a href="#"
+                    class="nav-link text-white hover:text-purple-200 transition-colors duration-200 flex items-center space-x-2">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Thống kê</span>
+                </a>
+                <a href="#"
+                    class="nav-link text-white hover:text-purple-200 transition-colors duration-200 flex items-center space-x-2">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Học tập</span>
+                </a>
+            </nav>
+
+            <!-- User Actions - This will be dynamically replaced -->
+            <div class="flex items-center space-x-4">
+                <!-- Default content - will be replaced by JavaScript -->
+                <div class="hidden lg:flex items-center space-x-3">
+                    <button class="login-btn px-4 py-2 text-white border border-white border-opacity-30 rounded-full hover:bg-white hover:bg-opacity-20 transition-all duration-200">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Đăng nhập
+                    </button>
+                    <button class="register-btn px-4 py-2 bg-white text-purple-600 rounded-full hover:bg-opacity-90 transition-all duration-200 font-medium">
+                        <i class="fas fa-user-plus mr-2"></i>Đăng ký
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn lg:hidden p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-all duration-200">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu lg:hidden fixed inset-y-0 right-0 w-64 glass-effect shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex justify-between items-center p-4 border-b border-white border-opacity-20">
+            <h3 class="text-white font-semibold">Menu</h3>
+            <button class="mobile-menu-close text-white hover:text-purple-200">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <nav class="p-4 space-y-4">
+            <a href="#" class="mobile-nav-link block text-white hover:text-purple-200 transition-colors py-2">
+                <i class="fas fa-home mr-3"></i>Trang chủ
+            </a>
+            <a href="#" class="mobile-nav-link block text-white hover:text-purple-200 transition-colors py-2">
+                <i class="fas fa-layer-group mr-3"></i>Chủ đề
+            </a>
+            <a href="#" class="mobile-nav-link block text-white hover:text-purple-200 transition-colors py-2">
+                <i class="fas fa-chart-line mr-3"></i>Thống kê
+            </a>
+            <a href="#" class="mobile-nav-link block text-white hover:text-purple-200 transition-colors py-2">
+                <i class="fas fa-graduation-cap mr-3"></i>Học tập
+            </a>
+
+            <!-- Auth section will be dynamically added here -->
+        </nav>
+    </div>
+</header>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-overlay fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
