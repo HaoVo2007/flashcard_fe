@@ -57,8 +57,14 @@
     <script src="/flashcard_fe/js/main.js"></script>
     <script src="/flashcard_fe/js/env.js"></script>
     <script>
+        
+              function speak(text) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US'; // hoặc 'en-UK'
+                speechSynthesis.speak(utterance);
+            }
         $(document).ready(function () {
-            checkAuth();
+            checkAuth()
             function checkAuth() {
                 const token = localStorage.getItem('token');
                 if (!token) {

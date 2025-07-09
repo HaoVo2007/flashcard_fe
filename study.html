@@ -21,28 +21,29 @@
     <div id="header"></div>
     <!-- Mode Selection -->
     <div class="max-w-6xl mx-auto px-4 py-6">
-        <div class="flex flex-wrap justify-center gap-4 mb-6">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-center mb-6">
             <button
-                class="mode-btn bg-blue-500 text-white py-3 px-16 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+                class="mode-btn bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors w-full"
                 data-mode="flashcard">
                 📇 Thẻ ghi nhớ
             </button>
             <button id="choose-meaning-btn"
-                class="mode-btn bg-white text-gray-700 py-3 px-16 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
+                class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border w-full"
                 data-mode="choose-meaning">
                 🎯 Chọn nghĩa đúng
             </button>
             <button id="choose-word-btn"
-                class="mode-btn bg-white text-gray-700 py-3 px-16 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
+                class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border w-full"
                 data-mode="choose-word">
                 🔤 Chọn từ đúng
             </button>
             <button
-                class="mode-btn bg-white text-gray-700 py-3 px-16 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
+                class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border w-full"
                 data-mode="test">
                 ✍️ Kiểm tra
             </button>
         </div>
+
 
         <!-- Progress Bar -->
         <div class="bg-white rounded-lg p-4 mb-6 shadow-sm">
@@ -76,6 +77,13 @@
                             <div class="text-sm opacity-80">Nghĩa tiếng Việt</div>
                         </div>
                     </div>
+                </div>
+                <div class="flex justify-center space-x-4 mb-4">
+                    <button class="speaker-btn bg-blue-500 space-x-4" id="speaker-btn" onclick="speakCurrentWord()">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                    </button>
                 </div>
                 <div class="text-gray-600 mb-6">
                     <p>Click vào thẻ để xem nghĩa tiếng Việt</p>
@@ -276,6 +284,27 @@
             loadWordQuizData();
             setupEventListeners();
         });
+
+        function speakCurrentWord() {
+            const word = words[currentIndex];
+            if (word) {
+                const speakerBtn = document.getElementById('speaker-btn');
+            
+                speakerBtn.classList.add('playing');
+
+                speak(word.word);
+                
+                setTimeout(() => {
+                    speakerBtn.classList.remove('playing');
+                }, 2000);
+            }
+        }
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-UK'; // hoặc 'en-UK'
+            speechSynthesis.speak(utterance);
+        }
         function checkAuth() {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -336,7 +365,6 @@
             // Mode switching
             $('.mode-btn').click(function () {
                 const mode = $(this).data('mode');
-                console.log('Switching to mode:', mode);
                 switchMode(mode);
             });
 
@@ -447,6 +475,7 @@
         // Flashcard functions
         function loadFlashcard() {
             const word = words[currentIndex];
+            console.log(word);
             $('#flashcard-word').text(word.word);
             $('#flashcard-type').text(word.word_type);
             $('#flashcard-definition').text(word.definition);

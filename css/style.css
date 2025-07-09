@@ -431,3 +431,36 @@
         background-position: 0% 50%;
     }
 }
+
+.speaker-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.speaker-btn:hover {
+    transform: scale(1.1);
+}
+
+.speaker-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: rgb(10, 7, 7);
+}
+
+.speaker-btn.playing {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
