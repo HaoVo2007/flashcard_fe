@@ -21,24 +21,24 @@
     <div id="header"></div>
     <!-- Mode Selection -->
     <div class="max-w-6xl mx-auto px-4 py-6">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="flex flex-wrap justify-center gap-4 mb-6">
             <button
-                class="mode-btn bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+                class="mode-btn bg-blue-500 text-white py-3 px-16 rounded-lg font-medium hover:bg-blue-600 transition-colors"
                 data-mode="flashcard">
                 📇 Thẻ ghi nhớ
             </button>
-            <button
-                class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
+            <button id="choose-meaning-btn"
+                class="mode-btn bg-white text-gray-700 py-3 px-16 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
                 data-mode="choose-meaning">
                 🎯 Chọn nghĩa đúng
             </button>
-            <button
-                class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
+            <button id="choose-word-btn"
+                class="mode-btn bg-white text-gray-700 py-3 px-16 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
                 data-mode="choose-word">
                 🔤 Chọn từ đúng
             </button>
             <button
-                class="mode-btn bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
+                class="mode-btn bg-white text-gray-700 py-3 px-16 rounded-lg font-medium hover:bg-gray-50 transition-colors border"
                 data-mode="test">
                 ✍️ Kiểm tra
             </button>
@@ -290,6 +290,13 @@
             return params.get('topic');
         }
 
+        function checkQuantityWords() {
+            if (words.length <= 3) {
+                $("#choose-meaning-btn").addClass('hidden');
+                $("#choose-word-btn").addClass  ('hidden');
+            }
+        }
+
         function getAuthToken() {
             return localStorage.getItem('token') || '';
         }
@@ -308,6 +315,7 @@
                 headers: getApiHeaders(),
                 success: function (response) {
                     words = response.data || [];
+                    checkQuantityWords();
                     updateProgress();
                     showMode(currentMode);
                     loadFlashcard();
@@ -328,6 +336,7 @@
             // Mode switching
             $('.mode-btn').click(function () {
                 const mode = $(this).data('mode');
+                console.log('Switching to mode:', mode);
                 switchMode(mode);
             });
 
@@ -429,7 +438,6 @@
         }
 
         function updateProgress() {
-            console.log(words)
             const progress = ((currentIndex + 1) / words.length) * 100;
             $('#progress-bar').css('width', progress + '%');
             $('#current-progress').text(currentIndex + 1);
@@ -477,7 +485,6 @@
             const word = words[currentIndex];
             $('#quiz-word').text(word.word);
             $('#quiz-type').text(word.word_type);
-
             // Generate options
             const options = generateMeaningOptions(word);
             const buttons = $('#choose-meaning-mode .option-btn');
@@ -494,7 +501,6 @@
         function generateMeaningOptions(correctWord) {
             const options = [correctWord.definition];
             const otherWords = words.filter(w => w.word !== correctWord.word);
-
             // Add 3 random wrong answers
             while (options.length < 4) {
                 const randomWord = otherWords[Math.floor(Math.random() * otherWords.length)];
@@ -502,7 +508,6 @@
                     options.push(randomWord.definition);
                 }
             }
-
             // Shuffle options
             for (let i = options.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -511,7 +516,6 @@
 
             // Store correct answer index
             correctAnswer = options.indexOf(correctWord.definition);
-
             return options;
         }
 
