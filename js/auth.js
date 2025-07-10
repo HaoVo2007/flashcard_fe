@@ -63,7 +63,7 @@ $(document).ready(function () {
                 password: formData.password
             }),
             success: function (response) {
-                if (response.status_code === 200 || response.data?.token) {
+                if (response.status_code === 201 || response.data?.token) {
                     toastr.success('Registration successful');
 
                     const token = response.data.token;
@@ -84,15 +84,11 @@ $(document).ready(function () {
                         phone: formData.phone
                     }));
 
-                    if (typeof window.AuthManager !== 'undefined') {
-                        window.AuthManager.checkAuthAndUpdateHeader();
-                    }
-
                     $('#registerForm')[0].reset();
 
                     setTimeout(function () {
-                        window.location.href = '/ecommerce_fe/index.html';
-                    }, 500);
+                        window.location.href = '/flashcard_fe/index.html';
+                    }, 1000);
                 } else {
                     toastr.error(response.message || 'Registration failed');
                 }

@@ -325,8 +325,9 @@ $(function () {
                 }
             },
             error: function (xhr) {
-                console.error('Refresh token failed:', xhr.responseText);
+                toastr.error('Refresh token failed:', xhr.responseText);
                 localStorage.clear();
+                window.location.href = '/flashcard_fe/auth/login.html'; 
                 if (typeof callback === 'function') {
                     callback(null);
                 }
