@@ -342,7 +342,7 @@
             emptyState.hide();
 
             const topicsHtml = topics.map((topic, index) => {
-                const completionPercentage = Math.round((topic.completedWords / topic.wordCount) * 100);
+                const completionPercentage = Math.round(topic.percent_competed);
                 const colorLight = lightenColor(topic.color, 20);
 
                 return `
@@ -374,12 +374,12 @@
                         
                         <div class="grid grid-cols-2 gap-3 mb-6">
                             <div class="stats-badge p-3 rounded-lg text-center">
-                                <div class="text-2xl font-bold text-indigo-600">${topic.wordCount}</div>
+                                <div class="text-2xl font-bold text-indigo-600">${topic.word_count}</div>
                                 <div class="text-xs text-gray-500 mt-1">Từ vựng</div>
                             </div>
                             <div class="stats-badge p-3 rounded-lg text-center">
-                                <div class="text-2xl font-bold text-green-600">${topic.completedWords}</div>
-                                <div class="text-xs text-gray-500 mt-1">Đã học</div>
+                                <div class="text-2xl font-bold text-green-600">${topic.un_word_count}</div>
+                                <div class="text-xs text-gray-500 mt-1">Chưa học</div>
                             </div>
                         </div>
                         

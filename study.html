@@ -109,7 +109,7 @@
                         <div class="text-sm opacity-80" id="quiz-type">verb</div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mb-6">
                     <button
                         class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                         data-answer="0">
@@ -149,7 +149,7 @@
                         <div class="text-sm opacity-80">Nghĩa tiếng Việt</div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mb-6">
                     <button
                         class="option-btn bg-gray-100 text-gray-800 py-4 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                         data-answer="0">
@@ -475,7 +475,6 @@
         // Flashcard functions
         function loadFlashcard() {
             const word = words[currentIndex];
-            console.log(word);
             $('#flashcard-word').text(word.word);
             $('#flashcard-type').text(word.word_type);
             $('#flashcard-definition').text(word.definition);
@@ -547,7 +546,6 @@
             correctAnswer = options.indexOf(correctWord.definition);
             return options;
         }
-
         function checkMeaningAnswer(button) {
             const selectedAnswer = parseInt(button.data('answer'));
             answered = true;
@@ -555,6 +553,7 @@
             if (selectedAnswer === correctAnswer) {
                 button.addClass('correct');
                 $('#quiz-result div').text('Chính xác! 🎉').addClass('text-green-600');
+                markAnswerCorrect();
             } else {
                 button.addClass('incorrect');
                 $(`#choose-meaning-mode .option-btn[data-answer="${correctAnswer}"]`).addClass('correct');
@@ -624,6 +623,8 @@
             if (selectedAnswer === correctAnswer) {
                 button.addClass('correct');
                 $('#word-quiz-result div').text('Chính xác! 🎉').addClass('text-green-600');
+                console.log(selectedAnswer, correctAnswer);
+                markAnswerCorrect();
             } else {
                 button.addClass('incorrect');
                 $(`#choose-word-mode .option-btn[data-answer="${correctAnswer}"]`).addClass('correct');
@@ -663,6 +664,7 @@
 
             if (userAnswer === correctWord) {
                 $('#test-result div').text('Chính xác! 🎉').removeClass('text-red-600').addClass('text-green-600');
+                markAnswerCorrect();
             } else {
                 $('#test-result div').text(`Sai rồi! Đáp án đúng là: ${words[currentIndex].word}`).removeClass('text-green-600').addClass('text-red-600');
             }
@@ -701,6 +703,24 @@
             updateProgress();
             showMode(currentMode);
             closeCongratulations();
+        }
+
+        function markAnswerCorrect() {
+            $.ajax({
+                url: `${ENV.API_BASE_URL}/api/v1/word/${words[currentIndex].id}`,
+                method: 'PUT',
+                headers: getApiHeaders(),
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    is_true: true
+                }),
+                success: function() {
+                    console.log('Cập nhật trả lời đúng thành công');
+                },
+                error: function(err) {
+                    console.error('Lỗi cập nhật trả lời đúng:', err);
+                }
+            });
         }
     </script>
 </body>
